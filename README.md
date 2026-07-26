@@ -9,20 +9,12 @@ Context Protocol) tool calls, reasons about comfort/energy trade-offs, and
 issues HVAC setpoint changes — validated by a deterministic safety layer —
 every control interval, with **no human intervention** during the run.
 
-# Eco-Loop Building Agents
-
-Autonomous Physical AI for building energy optimization using EnergyPlus,
-MCP, and an open-source LLM.
-
 ## 🎥 PoC Demo Video
 
-**[▶ Watch the 3-Minute Eco-Loop PoC Demo](YOUR_GOOGLE_DRIVE_LINK)**
+**[▶ Watch the 3-Minute Eco-Loop PoC Demo](https://drive.google.com/file/d/14eOOg98eIYK8Sa1XKeqpIVAwz3G3j4E4/view?usp=sharing)**
 
 > Demonstrates the EnergyPlus simulation, autonomous AI control,
 > MCP integration, dashboard, and baseline-vs-AI results.
-
-## Overview
-...
 
 ## Table of Contents
 
