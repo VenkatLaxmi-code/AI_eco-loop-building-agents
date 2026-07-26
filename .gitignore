@@ -1,0 +1,40 @@
+# Environment
+.env
+venv/
+env/
+__pycache__/
+*.pyc
+
+# EnergyPlus run artifacts
+*.audit
+*.bnd
+*.eio
+*.end
+*.err
+*.eso
+*.mdd
+*.mtd
+*.mtr
+*.rdd
+*.rvaudit
+*.shd
+*.dxf
+*.svg
+eplusout*
+eplustbl*
+sqlite.err
+
+# Data / logs (generated at runtime)
+data/*.csv
+data/*.json
+logs/*.log
+
+# Weather files (large, user-provided)
+weather/*.epw
+
+# OS / IDE
+.DS_Store
+.vscode/
+*.egg-info/
+.pytest_cache/
+

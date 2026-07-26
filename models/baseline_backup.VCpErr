@@ -1,0 +1,150 @@
+Program Version,Conversion 24.1 => 24.2
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    247 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    248     Wall_South,
+   *************    249     Wall,
+   *************    250     Exterior Wall,
+   *************    251     MAIN_ZONE,
+   *************    252     Outdoors,
+   *************    253     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Wall_South
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Wall_South
+   ** Severe  ** Out of range value Numeric Field#2 (Number of Vertices), value=0.00000, range={>=3}, in BuildingSurface:Detailed=Wall_South
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    263 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    264     Wall_East,
+   *************    265     Wall,
+   *************    266     Exterior Wall,
+   *************    267     MAIN_ZONE,
+   *************    268     Outdoors,
+   *************    269     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Wall_East
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Wall_East
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    279 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    280     Wall_North,
+   *************    281     Wall,
+   *************    282     Exterior Wall,
+   *************    283     MAIN_ZONE,
+   *************    284     Outdoors,
+   *************    285     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Wall_North
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Wall_North
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    295 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    296     Wall_West,
+   *************    297     Wall,
+   *************    298     Exterior Wall,
+   *************    299     MAIN_ZONE,
+   *************    300     Outdoors,
+   *************    301     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Wall_West
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Wall_West
+   ** Severe  ** Out of range value Numeric Field#2 (Number of Vertices), value=0.00000, range={>=3}, in BuildingSurface:Detailed=Wall_West
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    311 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    312     Floor,
+   *************    313     Floor,
+   *************    314     Floor Slab,
+   *************    315     MAIN_ZONE,
+   *************    316     Ground,
+   *************    317     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Floor
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Floor
+   ** Severe  ** Out of range value Numeric Field#2 (Number of Vertices), value=0.00000, range={>=3}, in BuildingSurface:Detailed=Floor
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    327 BuildingSurface:Detailed,
+   ************* Only last 6 lines before error line shown.....
+   *************    328     Roof,
+   *************    329     Roof,
+   *************    330     Roof,
+   *************    331     MAIN_ZONE,
+   *************    332     Outdoors,
+   *************    333     ,
+   ** Severe  ** Error detected in Object=BuildingSurface:Detailed, name=Roof
+   **   ~~~   ** Field [Outside Boundary Condition] is required but was blank
+   ** Severe  ** Out of range value Numeric Field#1 (View Factor to Ground), value=4.00000, range={>=0.0 and <=1.0}, in BuildingSurface:Detailed=Roof
+   ** Severe  ** Out of range value Numeric Field#2 (Number of Vertices), value=0.00000, range={>=3}, in BuildingSurface:Detailed=Roof
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    436 ZoneHVAC:IdealLoadsAirSystem,
+   ************* Only last 10 lines before error line shown.....
+   *************    438     ALWAYS_ON,
+   *************    439     MAIN_ZONE Supply Inlet,
+   *************    440     MAIN_ZONE Exhaust Node,
+   *************    441     ,
+   *************    442     ,
+   *************    443     50,
+   *************    444     13,
+   *************    445     0.0156,
+   *************    446     0.0077,
+   *************    447     NoLimit,
+   ** Warning ** Invalid Number in Numeric Field#5 (Maximum Heating Air Flow Rate), value=NoLimit, in ZoneHVAC:IdealLoadsAirSystem=MAIN_ZONE Ideal Loads
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    436 ZoneHVAC:IdealLoadsAirSystem,
+   ************* Only last 10 lines before error line shown.....
+   *************    441     ,
+   *************    442     ,
+   *************    443     50,
+   *************    444     13,
+   *************    445     0.0156,
+   *************    446     0.0077,
+   *************    447     NoLimit,
+   *************    448     ,
+   *************    449     ,
+   *************    450     LimitCapacity,
+   ** Warning ** Invalid Number in Numeric Field#7 (Maximum Cooling Air Flow Rate), value=LimitCapacity, in ZoneHVAC:IdealLoadsAirSystem=MAIN_ZONE Ideal Loads
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    436 ZoneHVAC:IdealLoadsAirSystem,
+   ************* Only last 10 lines before error line shown.....
+   *************    454     ,
+   *************    455     ,
+   *************    456     ,
+   *************    457     ,
+   *************    458     ,
+   *************    459     ,
+   *************    460     ,
+   *************    461     ,
+   *************    462     ,
+   *************    463     None,
+   ** Warning ** Invalid Number in Numeric Field#11 (Latent Heat Recovery Effectiveness), value=None, in ZoneHVAC:IdealLoadsAirSystem=MAIN_ZONE Ideal Loads
+   ************* IDF Context for following error/warning message:
+   ************* Note -- lines truncated at 300 characters, if necessary...
+   *************    436 ZoneHVAC:IdealLoadsAirSystem,
+   ************* Only last 10 lines before error line shown.....
+   *************    456     ,
+   *************    457     ,
+   *************    458     ,
+   *************    459     ,
+   *************    460     ,
+   *************    461     ,
+   *************    462     ,
+   *************    463     None,
+   *************    464     None,
+   *************    465     ,
+   ** Severe  ** IP: IDF line~465 Error detected for Object=ZoneHVAC:IdealLoadsAirSystem
+   **   ~~~   **  Maximum arguments reached for this object, trying to process -><-
+   ** Severe  ** Possible incorrect IDD File
+   **   ~~~   ** Possible Invalid Numerics or other problems
+   ** Severe  ** Out of "range" values found in input
+   ** Severe  ** Blank "required" fields found in input
+   ** Severe  ** Out of "range" values and/or blank required fields found in input
+   ************* Conversion Completed Successfully-- 3 Warning; 21 Severe Errors

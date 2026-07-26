@@ -1,0 +1,508 @@
+!-Generator IDFEditor 1.00
+!- Eco-Loop Building Agents - baseline.idf
+!- A single-zone office model used for BOTH the baseline (fixed-schedule)
+!- and AI-controlled runs. The AI run overrides CLG_SETPOINT_SCHED and
+!- HTG_SETPOINT_SCHED at runtime via EMS actuators (see
+!- app/simulation/actuators.py); the baseline run leaves them untouched,
+!- representing a conventional fixed-schedule BMS.
+!- RunPeriod length/start date is rewritten automatically at runtime
+!- from .env (SIMULATION_DAYS, RUN_PERIOD_START_MONTH/DAY) - see
+!- app/simulation/energyplus_runner.py::_prepare_idf_with_run_period.
+
+Version,24.1;
+
+SimulationControl,
+    No,                      !- Do Zone Sizing Calculation
+    No,                      !- Do System Sizing Calculation
+    No,                      !- Do Plant Sizing Calculation
+    No,                      !- Run Simulation for Sizing Periods
+    Yes,                     !- Run Simulation for Weather File Run Periods
+    No,                      !- Do HVAC Sizing Simulation for Sizing Periods
+    1;                       !- Maximum Number of HVAC Sizing Simulation Passes
+
+Building,
+    Eco-Loop Demo Building,  !- Name
+    0,                       !- North Axis {deg}
+    City,                    !- Terrain
+    0.04,                    !- Loads Convergence Tolerance Value
+    0.4,                     !- Temperature Convergence Tolerance Value {deltaC}
+    FullExterior,            !- Solar Distribution
+    25,                      !- Maximum Number of Warmup Days
+    6;                       !- Minimum Number of Warmup Days
+
+Timestep,4;
+
+Site:Location,
+    Generic City,            !- Name
+    37.62,                   !- Latitude {deg}
+    -122.40,                 !- Longitude {deg}
+    -8.0,                    !- Time Zone {hr}
+    2.0;                     !- Elevation {m}
+
+RunPeriod,
+    Eco-Loop Run,            !- Name
+    7,                       !- Begin Month
+    1,                       !- Begin Day of Month
+    2024,                    !- Begin Year
+    7,                       !- End Month
+    3,                       !- End Day of Month
+    2024,                    !- End Year
+    ,                        !- Day of Week for Start Day
+    No,                      !- Use Weather File Holidays and Special Days
+    No,                      !- Use Weather File Daylight Saving Period
+    No,                      !- Apply Weekend Holiday Rule
+    Yes,                     !- Use Weather File Rain Indicators
+    Yes;                     !- Use Weather File Snow Indicators
+
+GlobalGeometryRules,
+    UpperLeftCorner,         !- Starting Vertex Position
+    CounterClockWise,        !- Vertex Entry Direction
+    Relative;                !- Coordinate System
+
+! ============================================================
+! SCHEDULES
+! ============================================================
+
+ScheduleTypeLimits,
+    Fraction,
+    0.0,
+    1.0,
+    Continuous;
+
+ScheduleTypeLimits,
+    Temperature,
+    -60,
+    200,
+    Continuous;
+
+ScheduleTypeLimits,
+    Count,
+    0,
+    100,
+    Continuous;
+
+ScheduleTypeLimits,
+    ControlType,
+    0,
+    4,
+    Discrete;
+
+! Occupancy: 0 people overnight, ramps up 8-9am, 8 people 9am-6pm, ramps down, repeats daily.
+Schedule:Compact,
+    OCC_SCHED,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 08:00, 0.0,
+    Until: 09:00, 0.5,
+    Until: 18:00, 1.0,
+    Until: 19:00, 0.3,
+    Until: 24:00, 0.0;
+
+Schedule:Compact,
+    LIGHTS_SCHED,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 07:00, 0.05,
+    Until: 19:00, 0.9,
+    Until: 24:00, 0.05;
+
+Schedule:Compact,
+    EQUIP_SCHED,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 07:00, 0.10,
+    Until: 19:00, 0.80,
+    Until: 24:00, 0.10;
+
+Schedule:Compact,
+    ALWAYS_ON,
+    Fraction,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00, 1.0;
+
+Schedule:Compact,
+    ACTIVITY_SCHED,
+    Any Number,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00, 120;
+
+Schedule:Compact,
+    ZONE_CONTROL_TYPE_SCHED,
+    ControlType,
+    Through: 12/31,
+    For: AllDays,
+    Until: 24:00, 4;
+
+! These two schedules are the ONLY objects the closed-loop controller
+! writes to at runtime via EMS actuators (Schedule:Constant / Schedule Value).
+! Baseline run: left at these fixed default values for the whole simulation.
+! AI run: overwritten every control interval by app/simulation/actuators.py.
+Schedule:Constant,
+    CLG_SETPOINT_SCHED,
+    Temperature,
+    24.0;
+
+Schedule:Constant,
+    HTG_SETPOINT_SCHED,
+    Temperature,
+    21.0;
+
+! ============================================================
+! MATERIALS & CONSTRUCTIONS (simple, code-typical envelope)
+! ============================================================
+
+Material,
+    Concrete Block,
+    MediumRough,
+    0.2032,
+    0.72,
+    1000,
+    920;
+
+Material,
+    Insulation Board,
+    MediumRough,
+    0.0508,
+    0.03,
+    43,
+    1210;
+
+Material,
+    Gypsum Board,
+    Smooth,
+    0.0127,
+    0.16,
+    800,
+    1090;
+
+Material:NoMass,
+    Roof Insulation,
+    Rough,
+    2.0,
+    0.9,
+    0.7,
+    0.7;
+
+Material,
+    Built-up Roofing,
+    Rough,
+    0.0095,
+    0.16,
+    1121,
+    1460;
+
+Material,
+    Slab Floor Concrete,
+    MediumRough,
+    0.1016,
+    1.13,
+    2000,
+    1000;
+
+WindowMaterial:SimpleGlazingSystem,
+    Window Glass,
+    2.8,
+    0.6,
+    0.6;
+
+Construction,
+    Exterior Wall,
+    Concrete Block,
+    Insulation Board,
+    Gypsum Board;
+
+Construction,
+    Roof,
+    Built-up Roofing,
+    Roof Insulation;
+
+Construction,
+    Floor Slab,
+    Slab Floor Concrete;
+
+Construction,
+    Exterior Window,
+    Window Glass;
+
+! ============================================================
+! ZONE GEOMETRY - one 10m x 8m x 3m rectangular zone
+! ============================================================
+
+Zone,
+    MAIN_ZONE,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    autocalculate,
+    autocalculate;
+
+BuildingSurface:Detailed,
+    Wall_South,
+    Wall,
+    Exterior Wall,
+    MAIN_ZONE,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    0.5,
+    4,
+    0,0,3,
+    0,0,0,
+    10,0,0,
+    10,0,3;
+
+BuildingSurface:Detailed,
+    Wall_East,
+    Wall,
+    Exterior Wall,
+    MAIN_ZONE,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    0.5,
+    4,
+    10,0,3,
+    10,0,0,
+    10,8,0,
+    10,8,3;
+
+BuildingSurface:Detailed,
+    Wall_North,
+    Wall,
+    Exterior Wall,
+    MAIN_ZONE,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    0.5,
+    4,
+    10,8,3,
+    10,8,0,
+    0,8,0,
+    0,8,3;
+
+BuildingSurface:Detailed,
+    Wall_West,
+    Wall,
+    Exterior Wall,
+    MAIN_ZONE,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    0.5,
+    4,
+    0,8,3,
+    0,8,0,
+    0,0,0,
+    0,0,3;
+
+BuildingSurface:Detailed,
+    Floor,
+    Floor,
+    Floor Slab,
+    MAIN_ZONE,
+    Ground,
+    ,
+    NoSun,
+    NoWind,
+    1.0,
+    4,
+    0,0,0,
+    0,8,0,
+    10,8,0,
+    10,0,0;
+
+BuildingSurface:Detailed,
+    Roof,
+    Roof,
+    Roof,
+    MAIN_ZONE,
+    Outdoors,
+    ,
+    SunExposed,
+    WindExposed,
+    0,
+    4,
+    0,8,3,
+    0,0,3,
+    10,0,3,
+    10,8,3;
+
+FenestrationSurface:Detailed,
+    South Window,
+    Window,
+    Exterior Window,
+    Wall_South,
+    ,
+    autocalculate,
+    ,
+    ,
+    4,
+    2,0,2.5,
+    2,0,0.9,
+    8,0,0.9,
+    8,0,2.5;
+
+! ============================================================
+! INTERNAL LOADS
+! ============================================================
+
+People,
+    MAIN_ZONE People,
+    MAIN_ZONE,
+    OCC_SCHED,
+    People,
+    8,
+    ,
+    ,
+    0.3,
+    ,
+    ACTIVITY_SCHED,
+    ,
+    ,
+    ,
+    ,
+    Fanger;
+
+Lights,
+    MAIN_ZONE Lights,
+    MAIN_ZONE,
+    LIGHTS_SCHED,
+    Watts/Area,
+    ,
+    10,
+    ,
+    0.0,
+    0.4,
+    0.2,
+    0.0;
+
+ElectricEquipment,
+    MAIN_ZONE Equipment,
+    MAIN_ZONE,
+    EQUIP_SCHED,
+    Watts/Area,
+    ,
+    8,
+    ,
+    0.0,
+    0.3,
+    0.0;
+
+ZoneInfiltration:DesignFlowRate,
+    MAIN_ZONE Infiltration,
+    MAIN_ZONE,
+    ALWAYS_ON,
+    Flow/Zone,
+    0.03,
+    ,
+    ,
+    ,
+    0,
+    1,
+    0,
+    0;
+
+! ============================================================
+! HVAC - Ideal Loads Air System with dual setpoint thermostat.
+! Explicit (non-autosize) capacities so no Sizing:Zone / design-day
+! objects are required to run this model.
+! ============================================================
+
+ZoneControl:Thermostat,
+    MAIN_ZONE Thermostat,
+    MAIN_ZONE,
+    ZONE_CONTROL_TYPE_SCHED,
+    ThermostatSetpoint:DualSetpoint,
+    MAIN_ZONE DualSetpoint;
+
+ThermostatSetpoint:DualSetpoint,
+    MAIN_ZONE DualSetpoint,
+    HTG_SETPOINT_SCHED,
+    CLG_SETPOINT_SCHED;
+
+ZoneHVAC:IdealLoadsAirSystem,
+    MAIN_ZONE Ideal Loads,
+    ALWAYS_ON,
+    MAIN_ZONE Supply Inlet,
+    MAIN_ZONE Exhaust Node,
+    ,
+    ,
+    50,
+    13,
+    0.0156,
+    0.0077,
+    NoLimit,
+    ,
+    ,
+    LimitCapacity,
+    10000,
+    LimitCapacity,
+    10000,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    ,
+    None,
+    None,
+    ,
+    ,
+    ConstantSupplyHumidityRatio,
+    ConstantSupplyHumidityRatio;
+
+ZoneHVAC:EquipmentConnections,
+    MAIN_ZONE,
+    MAIN_ZONE Equipment List,
+    MAIN_ZONE Supply Inlet,
+    ,
+    MAIN_ZONE Air Node,
+    MAIN_ZONE Exhaust Node;
+
+ZoneHVAC:EquipmentList,
+    MAIN_ZONE Equipment List,
+    SequentialLoad,
+    ZoneHVAC:IdealLoadsAirSystem,
+    MAIN_ZONE Ideal Loads,
+    1,
+    1,
+    ,
+    ;
+
+! ============================================================
+! OUTPUT
+! ============================================================
+
+OutputControl:Table:Style,
+    CommaAndHTML;
+
+Output:VariableDictionary,
+    Regular;
+
+Output:Variable,*,Zone Mean Air Temperature,Timestep;
+Output:Variable,*,Site Outdoor Air Drybulb Temperature,Timestep;
+Output:Variable,*,Zone People Occupant Count,Timestep;
+Output:Variable,*,Facility Total HVAC Electricity Demand Rate,Timestep;
+Output:Variable,*,Facility Total Electricity Demand Rate,Timestep;
+Output:Variable,*,Zone Air System Sensible Cooling Rate,Timestep;
+Output:Variable,*,Zone Air System Sensible Heating Rate,Timestep;
+Output:Variable,*,Zone Air Relative Humidity,Timestep;
+
+Output:Meter,Electricity:Facility,Timestep;
+Output:Meter,Electricity:HVAC,Timestep;

@@ -1,0 +1,153 @@
+# System Report — Eco-Loop Building Agents
+
+## Problem
+
+Buildings account for a large share of global energy consumption, and most
+Building Management Systems (BMS) rely on fixed schedules and static rules.
+These systems cannot continuously adapt to changing weather, occupancy, or
+real-time energy demand, leaving significant efficiency and comfort
+improvements on the table.
+
+## Solution
+
+Eco-Loop Building Agents turns a simulated building into a live,
+closed-loop, autonomous system: an open-source LLM agent observes
+EnergyPlus-simulated conditions through MCP tools, reasons about comfort,
+occupancy, and energy trade-offs, and issues HVAC setpoint changes that
+are validated by a deterministic safety layer before being written back
+into the simulation — repeating every control interval, with no human
+intervention required during the run.
+
+## Architecture
+
+See `docs/ARCHITECTURE.md` for the full data-flow diagram. In short:
+
+```
+EnergyPlus -> Sensors -> MCP Tools -> LLM Agent -> Constraint Validator -> Actuators -> EnergyPlus
+```
+
+## EnergyPlus Integration
+
+- Uses the **official EnergyPlus Python API** (`pyenergyplus.api.EnergyPlusAPI`),
+  not eppy-only or a hand-rolled parser, for live simulation control.
+- Registers a callback on
+  `callback_begin_zone_timestep_after_init_heat_balance` to read sensor
+  data and (in AI mode) apply new setpoints every control interval.
+- Setpoints are overridden at runtime via **EMS actuators** on two
+  `Schedule:Constant` objects (`CLG_SETPOINT_SCHED`, `HTG_SETPOINT_SCHED`)
+  — no IDF editing or simulation restart is required mid-run.
+- `RunPeriod` length/start date is rewritten per-run from `.env` using
+  `eppy`, so the same `models/baseline.idf` drives both the baseline and
+  AI experiment.
+
+## MCP Architecture
+
+A real MCP server (`app/mcp_server/server.py`, built on the official `mcp`
+Python SDK's `FastMCP`) runs as a stdio subprocess. `BuildingAgent`
+maintains a persistent `ClientSession` for the whole run and calls 11
+distinct tools (state queries + `set_cooling_setpoint` /
+`set_heating_setpoint` / `apply_control_action`) as genuine
+request/response MCP calls — never a single mega-prompt masquerading as
+tool use.
+
+## Agent Design & Prompt Engineering
+
+The system prompt (`app/agent/prompts.py`) encodes an explicit priority
+order: (1) comfort & safety, (2) reduce total energy, (3) reduce
+unnecessary HVAC operation, (4) avoid excessive peak demand, (5) react to
+occupancy/weather, (6) make gradual, safe changes, (7) respect hard
+constraints, (8) learn from recent history. The agent must return a
+structured JSON object (`AgentDecision`: action, setpoints, reason,
+expected_effect, confidence) validated by Pydantic — no hidden
+chain-of-thought is persisted, only the auditable summary fields.
+
+## Control Strategy
+
+Every `CONTROL_INTERVAL_MINUTES` of simulated time, the agent:
+gathers state + comfort + energy + occupancy + history via MCP tools →
+checks for oscillation → calls the LLM → validates the JSON schema →
+submits the decision through `apply_control_action`, which enforces
+absolute setpoint bounds, a maximum per-interval rate of change, and a
+minimum heating/cooling deadband, before the result ever reaches
+EnergyPlus.
+
+## Safety Constraints
+
+All configurable via `.env`: `COOLING_SETPOINT_MIN/MAX`,
+`HEATING_SETPOINT_MIN/MAX`, `MIN_DEADBAND_C`,
+`MAX_SETPOINT_CHANGE_PER_INTERVAL`, `PMV_MIN/MAX`,
+`OCCUPIED_TEMP_MIN/MAX`. Enforced deterministically in
+`app/control/constraints.py`; the LLM cannot bypass this layer under any
+circumstances.
+
+## Self-Correction
+
+- Malformed LLM JSON → one retry with an error hint → deterministic
+  fallback controller.
+- Unreachable LLM (connection/timeout) → immediate fallback controller.
+- Detected setpoint oscillation (alternating direction over 4
+  consecutive decisions) → fallback controller for that step.
+- Any exception inside the EnergyPlus timestep callback is caught and
+  logged (`result.errors`) rather than crashing the simulation.
+
+## Experiment Methodology
+
+Two runs share the same building geometry, weather file, and
+`RunPeriod` (length/start date configured once via `.env`):
+
+1. **Baseline** — EnergyPlus with its native fixed setpoint schedules
+   (conventional BMS).
+2. **AI** — the same IDF, with setpoints overridden every control
+   interval by the autonomous agent.
+
+## Metrics
+
+Computed in `app/analytics/metrics.py` / `comparison.py` directly from the
+captured `BuildingState` timeseries of each run (no fabricated numbers):
+
+- Total building energy (kWh), HVAC energy (kWh) — via time-integration
+  of instantaneous power columns.
+- `energy_savings_percent = ((baseline_energy - ai_energy) / baseline_energy) * 100`
+- Peak demand (W) and peak-demand reduction %.
+- Average zone temperature, comfort compliance % (occupied timesteps
+  within the configured comfort band), and PMV min/mean/max.
+
+## Results
+
+> Results are generated by actually running the experiments on your
+> machine (EnergyPlus + weather file + LLM required) and are **not**
+> pre-filled here. After running:
+>
+> ```
+> python scripts/run_demo.py
+> ```
+>
+> the real numbers are written to `data/metrics.json` and rendered in
+> `streamlit run dashboard/app.py`. Until then, this section is
+> intentionally left as **PENDING — run the experiment to populate.**
+
+## Limitations
+
+- The bundled model is a single-zone office; multi-zone/multi-system
+  buildings would need an expanded IDF and per-zone actuator handles.
+- The `ZoneHVAC:IdealLoadsAirSystem` isolates control-strategy effects
+  from a specific real HVAC plant design; a production deployment would
+  need to map decisions onto the actual equipment's control points.
+- PMV is read directly from EnergyPlus's `Zone Thermal Comfort Fanger
+  Model PMV` output variable, which requires the corresponding
+  `People` object to have thermal comfort models enabled; if disabled,
+  `pmv` will be `null` and comfort checks fall back to the temperature
+  band only.
+- LLM decision quality/latency depends on the chosen open-source model;
+  smaller models may need a longer `CONTROL_INTERVAL_MINUTES` or more
+  retries.
+
+## Future Improvements
+
+- Multi-zone control with per-zone agents or a single agent reasoning
+  over multiple zones simultaneously.
+- Demand-response / time-of-use electricity pricing awareness.
+- Reinforcement-learning-based fine-tuning of the fallback controller
+  using logged decision outcomes.
+- Richer occupancy sensing (CO2-based) instead of the scheduled `People`
+  object.
