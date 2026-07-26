@@ -280,6 +280,12 @@ reduction, average temperature, comfort compliance), timeseries charts
 full agent decision log table. If the underlying CSV/JSON files don't
 exist yet, the dashboard tells you exactly which script to run first.
 
+## 🎥 PoC Demo Video
+
+Watch the complete Eco-Loop Building Agents proof-of-concept demonstration:
+
+[▶️ Watch the PoC Demo Video](https://drive.google.com/file/d/14eOOg98eIYK8Sa1XKeqpIVAwz3G3j4E4/view?usp=sharing)
+
 ## Troubleshooting
 
 **EnergyPlus not found**
