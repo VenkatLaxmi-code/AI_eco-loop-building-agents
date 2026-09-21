@@ -1,4 +1,4 @@
-# Eco-Loop Building Agents
+# AI-Eco-Loop Building Agents
 
 **Autonomous AI Building Energy Optimization using EnergyPlus + Open-Source LLM + MCP**
 
